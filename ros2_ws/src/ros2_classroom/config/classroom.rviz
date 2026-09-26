@@ -1,0 +1,49 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+Visualization Manager:
+  Class: ""
+  Global Options:
+    Background Color: 36; 40; 48
+    Fixed Frame: base_link
+    Frame Rate: 30
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Name: Grid
+      Enabled: true
+      Cell Size: 0.5
+      Plane Cell Count: 20
+      Color: 100; 110; 125
+      Offset:
+        X: 0
+        Y: 0
+        Z: -0.72
+    - Class: rviz_default_plugins/RobotModel
+      Name: RoboParty
+      Enabled: true
+      Description Source: Topic
+      Description Topic:
+        Value: /robot_description
+        Durability Policy: Transient Local
+        Reliability Policy: Reliable
+        History Policy: Keep Last
+        Depth: 5
+      Visual Enabled: true
+      Collision Enabled: false
+      Alpha: 1
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 2.8
+      Pitch: 0.15
+      Yaw: 0.7
+      Focal Point:
+        X: 0
+        Y: 0
+        Z: 0
+      Target Frame: base_link
+Window Geometry:
+  Width: 1400
+  Height: 850
+  X: 0
+  Y: 0
