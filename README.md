@@ -1,5 +1,7 @@
 # ROS 2 + RoboParty Classroom
 
+> **Prefer a web page?** Open the interactive version of this guide, with copy buttons, a pendulum demo and checklists that remember your progress: https://claude.ai/artifact/HnKzVNcM9vZvQUziokhyJ2
+
 Learn ROS 2 by running real nodes in Docker. We'll get ROS 2 running on your laptop, send messages between nodes, call a service, then bend the joints of a real humanoid model. Four lessons, in order. No robots get hurt.
 
 | ROS 2 | Runs on | Lessons | RViz |
