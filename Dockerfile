@@ -1,7 +1,7 @@
 FROM ros:humble-ros-base-jammy
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ros-humble-rviz2 ros-humble-robot-state-publisher ros-humble-joint-state-publisher-gui ros-humble-demo-nodes-cpp \
+    ros-humble-rviz2 ros-humble-robot-state-publisher ros-humble-joint-state-publisher-gui \
     ros-humble-example-interfaces ros-humble-tf2-ros python3-colcon-common-extensions \
     xvfb x11vnc novnc websockify openbox supervisor xterm mesa-utils scrot \
     && rm -rf /var/lib/apt/lists/*
