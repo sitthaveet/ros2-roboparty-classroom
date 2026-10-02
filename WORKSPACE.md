@@ -21,7 +21,7 @@ On your host, edit source files under `ros2_ws/src`. Inside the classroom contai
 └── log/                      # Build logs
 ```
 
-`colcon build` creates `build`, `install` and `log`. Run it from the **workspace root**, not from `src` or a package directory. Commit source and configuration to Git; do not commit generated build folders. The container also contains helper scripts and tests copied from the repository.
+`colcon build` creates `build`, `install` and `log`. Run it from the **workspace root**, not from `src` or a package directory. Commit source and configuration to Git; do not commit generated build folders.
 
 ## Build and source the supplied workspace
 
@@ -39,7 +39,7 @@ Expected package prefix: `/opt/ros2_ws/install/ros2_classroom`.
 
 - `/opt/ros/humble` is the **underlay**: the installed ROS distribution.
 - `/opt/ros2_ws/install` is the **overlay**: packages built for this project.
-- `source` updates the current shell's environment. In this classroom image, interactive Bash loads `/etc/classroom/entrypoint-rc.sh` through `/root/.bashrc`, so `docker compose exec ros bash` prepares ROS and the supplied workspace automatically. A new practice workspace still needs its own `source install/setup.bash` after building.
+- `source` updates the current shell's environment. In this classroom image, `/root/.bashrc` sources the workspace, so `docker compose exec ros bash` prepares ROS and the supplied workspace automatically. A new practice workspace still needs its own `source install/setup.bash` after building.
 - `--symlink-install` links supported source files instead of copying them. Restart a Python node after changing its code. Changes to dependencies, entry points or package structure still need a rebuild.
 - `source` does not compile code, and `colcon build` does not automatically update other open terminals.
 

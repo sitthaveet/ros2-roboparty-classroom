@@ -272,7 +272,7 @@ Open [`basic_publisher.py`](ros2_ws/src/ros2_classroom/ros2_classroom/basic_publ
 | 12 | A timer calls `tick()` every 1.0 seconds. |
 | 15 | The mock "image": 12 random letters and digits, new every frame. |
 | 16–18 | Build a `String`, fill its `data` field, publish it. |
-| 25 | `rclpy.spin()` keeps the node alive so timers and callbacks run, until you press Ctrl+C. |
+| 24 | `rclpy.spin()` keeps the node alive so timers and callbacks run, until you press Ctrl+C. |
 
 Open [`basic_subscriber.py`](ros2_ws/src/ros2_classroom/ros2_classroom/basic_subscriber.py):
 
@@ -396,17 +396,17 @@ Open [`add_client.py`](ros2_ws/src/ros2_classroom/ros2_classroom/add_client.py):
 | Line | What it does |
 |---|---|
 | 9 | The client uses the same type and service name as the server. |
-| 11–12 | Wait up to 5 s for the server. No server? Stop with a clear error. |
-| 14 | Fill in the request: `a = 7`, `b = 5`. |
-| 15–16 | `call_async` returns a **future**, a placeholder for an answer that hasn't arrived yet. `spin_until_future_complete` runs the node until it does, or 5 s pass. |
-| 18 | `future.result()` is the response, and `.sum` is its field. |
+| 10–11 | Wait up to 5 s for the server. No server? Stop with a clear error. |
+| 13 | Fill in the request: `a = 7`, `b = 5`. |
+| 14–15 | `call_async` returns a **future**, a placeholder for an answer that hasn't arrived yet. `spin_until_future_complete` runs the node until it does. |
+| 16 | `future.result()` is the response, and `.sum` is its field. |
 
 ### Try it
 
-1. **New numbers.** Change line 14 of `add_client.py` to add `100` and `-42`, then run the client again.
+1. **New numbers.** Change line 13 of `add_client.py` to add `100` and `-42`, then run the client again.
    <details><summary>Answer</summary><code>Sum = 58</code>. No rebuild needed, thanks to <code>--symlink-install</code>.</details>
 2. **No server.** Stop the server in A, then run `add_client`. What happens, and how long does it take?
-   <details><summary>Answer</summary>After about 5 seconds it stops with <code>RuntimeError: Start add_server in another terminal first</code>, from lines 11–12.</details>
+   <details><summary>Answer</summary>After about 5 seconds it stops with <code>RuntimeError: Start add_server in another terminal first</code>, from lines 10–11.</details>
 3. **Change the rule.** Make the server multiply (`request.a * request.b`), restart A, and call it with `{a: 6, b: 7}`. The field is still called `sum`. Why can't you rename it in Python?
    <details><summary>Answer</summary>Field names come from the <code>AddTwoInts</code> interface, not your code. Both sides share that interface, so a new field name means a new <code>.srv</code> type.</details>
 4. **Topic or service?** Pick one for each: a camera sending 30 images a second; asking a robot to save a map; a battery level reported every second.
@@ -438,11 +438,11 @@ Open [`pendulum.urdf`](ros2_ws/src/ros2_classroom/model/urdf/pendulum.urdf). Two
 
 | Line | What it does |
 |---|---|
-| 7 | `base_link`: a 10 cm grey box. The root of the tree. It doesn't move. |
-| 14 | `pendulum_link`: a 1 m rod (centred 0.5 m below the joint) and a red ball 1 m down. Units are metres. |
-| 27 | `type="continuous"` spins forever, no limits. `revolute` also rotates but has a `<limit>`. `fixed` doesn't move at all. |
-| 28–29 | The joint connects parent `base_link` to child `pendulum_link`. |
-| 30 | `axis xyz="0 1 0"`: rotate around the y axis. |
+| 6 | `base_link`: a 10 cm grey box. The root of the tree. It doesn't move. |
+| 13 | `pendulum_link`: a 1 m rod (centred 0.5 m below the joint) and a ball 1 m down. Units are metres. |
+| 26 | `type="continuous"` spins forever, no limits. `revolute` also rotates but has a `<limit>`. `fixed` doesn't move at all. |
+| 27–28 | The joint connects parent `base_link` to child `pendulum_link`. |
+| 29 | `axis xyz="0 1 0"`: rotate around the y axis. |
 
 A joint has one number, its **position**, in radians. 1 radian ≈ 57.3°, so π (3.14) is half a turn. ROS always uses radians for angles.
 

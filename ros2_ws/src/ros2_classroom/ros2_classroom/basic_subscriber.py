@@ -14,13 +14,9 @@ class Viewer(Node):
 
 def main():
     rclpy.init()
-    node = Viewer()
     try:
-        rclpy.spin(node)
-    except KeyboardInterrupt:
+        rclpy.spin(Viewer())
+    except KeyboardInterrupt:  # Ctrl+C
         pass
-    finally:
-        node.destroy_node()
-        if rclpy.ok(): rclpy.shutdown()
 
 if __name__ == '__main__': main()

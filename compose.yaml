@@ -5,7 +5,5 @@ services:
     ports:
       - "127.0.0.1:6080:6080"
     shm_size: "512m"
-    environment:
-      ROS_LOCALHOST_ONLY: "1"
     volumes:
       - ./ros2_ws/src:/opt/ros2_ws/src
