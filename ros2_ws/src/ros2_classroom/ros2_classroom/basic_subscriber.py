@@ -3,18 +3,18 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 
-class Listener(Node):
+class Viewer(Node):
     def __init__(self):
-        super().__init__('classroom_listener')
+        super().__init__('classroom_viewer')
         self.subscription = self.create_subscription(
-            String, '/classroom/chatter', self.receive, 10)
+            String, '/camera/camera/color/image_raw', self.receive, 10)
 
     def receive(self, msg):
         self.get_logger().info(f'Received: {msg.data}')
 
 def main():
     rclpy.init()
-    node = Listener()
+    node = Viewer()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

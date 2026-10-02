@@ -180,7 +180,7 @@ Read [WORKSPACE.md](WORKSPACE.md) for more on the workspace layout and to build 
 
 ## Lesson 02 — Publisher and subscriber
 
-Run two Python nodes that chat over a topic, spy on them with the `ros2` tools, then change what they say.
+Run a mock camera node that sends "images" over a topic and a viewer node that receives them, spy on them with the `ros2` tools, then change what they send.
 
 **You'll learn:** node · topic · message type · publisher · callback · timer
 
@@ -188,9 +188,11 @@ Run two Python nodes that chat over a topic, spy on them with the `ros2` tools, 
 
 A **node** is one running program in ROS. Nodes talk by sending **messages** on named **topics**. A publisher sends without knowing who's listening, and any number of subscribers can listen. Both sides must agree on the topic name and the message type.
 
+Our publisher pretends to be a camera. It uses `/camera/camera/color/image_raw`, the topic name an Intel RealSense camera driver uses for its colour image. A real camera sends `sensor_msgs/msg/Image`, millions of numbers per frame. We send a `String` with a made-up image code instead, so you can read every message.
+
 ```text
-/classroom_talker  ── publishes every 1.0 s ──▶  /classroom/chatter  ── delivers to ──▶  /classroom_listener
-(basic_publisher)                               (std_msgs/String)                      (basic_subscriber)
+/classroom_camera  ── publishes every 1.0 s ──▶  /camera/camera/color/image_raw  ── delivers to ──▶  /classroom_viewer
+(basic_publisher)                               (std_msgs/String)                                  (basic_subscriber)
 ```
 
 ### 1. Start the publisher
@@ -200,11 +202,11 @@ A **node** is one running program in ROS. Nodes talk by sending **messages** on 
 ros2 run ros2_classroom basic_publisher
 ```
 
-Expected (timestamps differ):
+Expected (timestamps and image codes differ):
 ```text
-[INFO] [...] [classroom_talker]: Hello RoboParty 0
-[INFO] [...] [classroom_talker]: Hello RoboParty 1
-[INFO] [...] [classroom_talker]: Hello RoboParty 2
+[INFO] [...] [classroom_camera]: hello world, here is the image: as898hjsdfas
+[INFO] [...] [classroom_camera]: hello world, here is the image: Kq3vZ8pLw0Te
+[INFO] [...] [classroom_camera]: hello world, here is the image: 7fRb2NxuYc4M
 ```
 
 `ros2 run <package> <executable>` starts a program from a package. The executable names live in `setup.py`.
@@ -218,11 +220,11 @@ ros2 run ros2_classroom basic_subscriber
 
 Expected:
 ```text
-[INFO] [...] [classroom_listener]: Received: Hello RoboParty 5
-[INFO] [...] [classroom_listener]: Received: Hello RoboParty 6
+[INFO] [...] [classroom_viewer]: Received: hello world, here is the image: Dw61hQsoP9aZ
+[INFO] [...] [classroom_viewer]: Received: hello world, here is the image: mT0xEv5gRk2B
 ```
 
-The count doesn't start at 0. A subscriber only hears messages sent after it joined.
+The codes match what A printed, but B starts partway through. A subscriber only hears messages sent after it joined.
 
 ### 3. Inspect the system
 
@@ -231,21 +233,21 @@ Leave A and B running. Use C to look around, one command at a time:
 **Terminal C**:
 ```sh
 ros2 node list
-ros2 node info /classroom_talker
+ros2 node info /classroom_camera
 ros2 topic list -t
-ros2 topic info /classroom/chatter --verbose
+ros2 topic info /camera/camera/color/image_raw --verbose
 ros2 interface show std_msgs/msg/String
-ros2 topic echo /classroom/chatter
-ros2 topic hz /classroom/chatter
+ros2 topic echo /camera/camera/color/image_raw
+ros2 topic hz /camera/camera/color/image_raw
 ```
 
 | Command | Look for |
 |---|---|
-| `node list` | `/classroom_talker` and `/classroom_listener`. The others (`/robot_state_publisher`, `/rviz2`, …) run the robot display and started on their own. |
-| `topic list -t` | `/classroom/chatter [std_msgs/msg/String]`: the topic and its type |
+| `node list` | `/classroom_camera` and `/classroom_viewer`. The others (`/robot_state_publisher`, `/rviz2`, …) run the robot display and started on their own. |
+| `topic list -t` | `/camera/camera/color/image_raw [std_msgs/msg/String]`: the topic and its type |
 | `topic info --verbose` | Publisher count: 1, Subscription count: 1, plus QoS settings |
 | `interface show` | One field: `string data` |
-| `topic echo` | `data: Hello RoboParty …`. Stop with Ctrl+C. |
+| `topic echo` | `data: 'hello world, here is the image: …'`. Stop with Ctrl+C. |
 | `topic hz` | Average rate near 1.000, since the timer fires every 1.0 s. Stop with Ctrl+C. |
 
 ### 4. Publish from the command line
@@ -254,10 +256,10 @@ Stop the publisher in A with Ctrl+C. Keep B running. Now you're the publisher:
 
 **Terminal C**:
 ```sh
-ros2 topic pub --once /classroom/chatter std_msgs/msg/String "{data: 'Hello from terminal C'}"
+ros2 topic pub --once /camera/camera/color/image_raw std_msgs/msg/String "{data: 'hello world, here is the image: from terminal C'}"
 ```
 
-B prints `Received: Hello from terminal C`. The subscriber doesn't care who sent it. Swap `--once` for `--rate 2` to send twice a second, then stop it with Ctrl+C.
+B prints `Received: hello world, here is the image: from terminal C`. The subscriber doesn't care who sent it. Swap `--once` for `--rate 2` to send twice a second, then stop it with Ctrl+C.
 
 ### 5. Read the code
 
@@ -265,11 +267,12 @@ Open [`basic_publisher.py`](ros2_ws/src/ros2_classroom/ros2_classroom/basic_publ
 
 | Line | What it does |
 |---|---|
-| 8 | The node's name. It's what `ros2 node list` shows. |
-| 9 | `create_publisher(type, topic, 10)`: message type, topic name, and queue depth (hold up to 10 messages if things get slow). |
-| 11 | A timer calls `tick()` every 1.0 seconds. |
-| 14–16 | Build a `String`, fill its `data` field, publish it. |
-| 24 | `rclpy.spin()` keeps the node alive so timers and callbacks run, until you press Ctrl+C. |
+| 10 | The node's name. It's what `ros2 node list` shows. |
+| 11 | `create_publisher(type, topic, 10)`: message type, topic name, and queue depth (hold up to 10 messages if things get slow). |
+| 12 | A timer calls `tick()` every 1.0 seconds. |
+| 15 | The mock "image": 12 random letters and digits, new every frame. |
+| 16–18 | Build a `String`, fill its `data` field, publish it. |
+| 25 | `rclpy.spin()` keeps the node alive so timers and callbacks run, until you press Ctrl+C. |
 
 Open [`basic_subscriber.py`](ros2_ws/src/ros2_classroom/ros2_classroom/basic_subscriber.py):
 
@@ -280,17 +283,17 @@ Open [`basic_subscriber.py`](ros2_ws/src/ros2_classroom/ros2_classroom/basic_sub
 
 ### 6. Change the code
 
-On your computer, open `ros2_ws/src/ros2_classroom/ros2_classroom/basic_publisher.py` and change the greeting on line 15, for example to `f'Hi from team 3, message {self.count}'`. Save, restart the publisher in A, and B shows your new text. No rebuild needed.
+On your computer, open `ros2_ws/src/ros2_classroom/ros2_classroom/basic_publisher.py` and change the text on line 17, for example to `f'Team 3 camera, image: {image}'`. Save, restart the publisher in A, and B shows your new text. No rebuild needed.
 
 ### Try it
 
-1. **Speed it up.** Change the timer on line 11 from `1.0` to `0.2`. What does `ros2 topic hz /classroom/chatter` say now?
+1. **Speed it up.** Change the timer on line 12 from `1.0` to `0.2`. What does `ros2 topic hz /camera/camera/color/image_raw` say now?
    <details><summary>Answer</summary>About 5 Hz. 1 ÷ 0.2 s = 5 messages per second.</details>
-2. **Break the connection.** In `basic_subscriber.py` change the topic to `/classroom/chat` and restart B. Why does nothing arrive?
-   <details><summary>Answer</summary>They're on two different topics now. <code>ros2 topic list</code> shows both <code>/classroom/chatter</code> and <code>/classroom/chat</code>, each with only one side. Change it back afterwards.</details>
+2. **Break the connection.** In `basic_subscriber.py` change the topic to `/camera/color/image_raw` and restart B. Why does nothing arrive?
+   <details><summary>Answer</summary>They're on two different topics now. <code>ros2 topic list</code> shows both <code>/camera/camera/color/image_raw</code> and <code>/camera/color/image_raw</code>, each with only one side. One missing word is enough. Change it back afterwards.</details>
 3. **Two listeners.** Run `basic_subscriber` in both B and C. Does each message go to one listener or both?
    <details><summary>Answer</summary>Both. Every subscriber gets its own copy of each message.</details>
-4. **Rename the node.** Change `'classroom_talker'` to a name of your own. What changes in `ros2 node list`, and what doesn't?
+4. **Rename the node.** Change `'classroom_camera'` to a name of your own. What changes in `ros2 node list`, and what doesn't?
    <details><summary>Answer</summary>The node shows up under its new name, but B still receives everything. Subscribers match on the topic, not on who's publishing.</details>
 
 ### Checklist
@@ -298,7 +301,7 @@ On your computer, open `ros2_ws/src/ros2_classroom/ros2_classroom/basic_publishe
 - [ ] B receives the messages published by A
 - [ ] I can find a topic's name and type with `ros2 topic list -t`
 - [ ] I published a message myself with `ros2 topic pub`
-- [ ] I changed the greeting and saw it in B after restarting A
+- [ ] I changed the message text and saw it in B after restarting A
 - [ ] I can explain what a callback is
 
 ---

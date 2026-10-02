@@ -1,25 +1,26 @@
-"""Publish a String once per second. Change the text and run again."""
+"""Publish a mock camera image as a String once per second. Change the text and run again."""
+import random
+import string
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 
-class Talker(Node):
+class MockCamera(Node):
     def __init__(self):
-        super().__init__('classroom_talker')
-        self.publisher = self.create_publisher(String, '/classroom/chatter', 10)
-        self.count = 0
+        super().__init__('classroom_camera')
+        self.publisher = self.create_publisher(String, '/camera/camera/color/image_raw', 10)
         self.timer = self.create_timer(1.0, self.tick)
 
     def tick(self):
+        image = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
         msg = String()
-        msg.data = f'Hello RoboParty {self.count}'
+        msg.data = f'hello world, here is the image: {image}'
         self.publisher.publish(msg)
         self.get_logger().info(msg.data)
-        self.count += 1
 
 def main():
     rclpy.init()
-    node = Talker()
+    node = MockCamera()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

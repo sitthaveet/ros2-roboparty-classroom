@@ -20,7 +20,7 @@ state = {'joints': None, 'text': None}
 def save_joints(m): state['joints'] = m
 def save_text(m): state['text'] = m.data
 subs = [n.create_subscription(JointState, '/joint_states', save_joints, 10),
-        n.create_subscription(String, '/classroom/chatter', save_text, 10)]
+        n.create_subscription(String, '/camera/camera/color/image_raw', save_text, 10)]
 buffer = Buffer()
 listener_tf = TransformListener(buffer, n)
 root = ET.parse(Path(get_package_share_directory('ros2_classroom')) / 'model/urdf/rpo.urdf').getroot()
@@ -57,7 +57,7 @@ try:
     print(f'PASS: {len(limits)} GUI joint states within URDF limits and complete TF tree from base_link')
     procs.append(subprocess.Popen(['ros2','run','ros2_classroom','basic_publisher'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,start_new_session=True))
     until(lambda: state['text'] is not None)
-    assert state['text'].startswith('Hello RoboParty ')
+    assert state['text'].startswith('hello world, here is the image: ')
     procs.append(subprocess.Popen(['ros2','run','ros2_classroom','add_server'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,start_new_session=True))
     req=AddTwoInts.Request();req.a=7;req.b=5
     assert call('/classroom/add',AddTwoInts,req).sum==12
@@ -66,7 +66,7 @@ try:
     listener=subprocess.Popen(['ros2','run','ros2_classroom','basic_subscriber'],stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,start_new_session=True)
     procs.append(listener);pump(2);os.killpg(listener.pid, signal.SIGINT)
     out=listener.communicate(timeout=5)[0]
-    assert 'Received: Hello RoboParty' in out, out
+    assert 'Received: hello world, here is the image: ' in out, out
     print('PASS: Python publisher, subscriber, AddTwoInts server and asynchronous client')
 finally:
     for p in procs:

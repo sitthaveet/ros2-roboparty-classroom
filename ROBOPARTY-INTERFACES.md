@@ -34,7 +34,7 @@ The request is empty; the response contains `success` and `message`. For example
 |---|---|
 | GUI → `/joint_states` (`JointState`) | Names and positions describe the visual joints. The GUI values are not motor feedback. |
 | URDF + `robot_state_publisher` → TF | Joint names must match the URDF. The inspected inference uses names such as `joint_1`, which require mapping. |
-| `/classroom/chatter` (`String`) | Practice publisher/subscriber and callbacks independently of robot control. |
+| `/camera/camera/color/image_raw` (mock, `String`) | Practice publisher/subscriber and callbacks with a camera-style topic name. A real RealSense driver publishes `sensor_msgs/msg/Image` on this topic. |
 | `/classroom/add` (`AddTwoInts`) | Learn service request/response without calling a hardware service. |
 
 The GUI classroom keeps `base_link` fixed and has no velocity-command, joint-command or reset service for the model. The `/cmd_vel`, `/joint_ref_states` and Trigger services above belong to the external hardware runtime, not this display launch.
